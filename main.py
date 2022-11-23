@@ -1,12 +1,8 @@
-"""
-TODO:
-    * show_orders
-"""
 import telebot
 from telebot import types
 from db.db import DB
 
-API_TOKEN = '5405008993:AAHERhjznn_4l5k9-5nBTgS-W0DDSqXYGfo'
+API_TOKEN = 'API'
 bot = telebot.TeleBot(API_TOKEN, parse_mode="html")
 
 DB = DB("db/tg_db.db")
@@ -39,6 +35,7 @@ def get_info(message) -> None:
     user_age = DB.user_age(message.from_user.id)
     user_city = DB.user_city(message.from_user.id)
     user_join_date = DB.user_join_date(message.from_user.id)
+
     bot.send_message(message.chat.id, DB.get_user_info(message.from_user.id, user_first_name, user_last_name, user_age,
                                                        user_city, user_join_date))
 
@@ -61,11 +58,17 @@ def edit_info(message) -> None:
 @bot.callback_query_handler(func=lambda callback: True)
 def edit_info_reply(callback):
     if callback.data == "user_f_name":
-        bot.send_message(callback.message.chat.id, f"Ok, cool. Now type your new first name down below.")
-        DB.edit_user_param(callback.message.chat.id, "user_fname", "Test")
+        bot.send_message(callback.message.chat.id, f"Sorry, that's test area for now.")
+        # DB.edit_user_param(callback.message.chat.id, "user_fname", "Test")
+
     elif callback.data == "user_l_name":
-        bot.send_message(callback.message.chat.id, f"Ok, cool. Now type your new first name down below.")
-        DB.edit_user_param(callback.message.chat.id, "user_lname", "Test")
+        bot.send_message(callback.message.chat.id, f"Sorry, that's test area for now.")
+
+    elif callback.data == "user_age":
+        bot.send_message(callback.message.chat.id, f"Sorry, that's test area for now.")
+
+    elif callback.data == "user_city":
+        bot.send_message(callback.message.chat.id, f"Sorry, that's test area for now.")
 
 
 @bot.message_handler(commands=["add_order"])
@@ -83,10 +86,57 @@ def add_order(message) -> None:
         reply = f"Order with title <b>{order_title}</b> has been added"
         bot.send_message(message.chat.id, reply)
     except:
-        instruction = f"\U00002757Post your order <u>correctly</u>:\n" \
+        instruction = f"\U00002757 Post your order <u>correctly</u>:\n" \
                       f"\n<b>Structure</b>: /add_order -title; order description; order price" \
                       f"\nExample: /add_order -Battle of water; Simple water for 300$; 300"
         bot.send_message(message.chat.id, instruction)
+
+
+@bot.message_handler(commands=["show_orders"])
+def get_orders(message):
+    orders = DB.show_orders()
+    reply = "\U0001F5D2 Available orders:\n"
+    for i in orders:
+        order_id = i[0]
+        order_title = i[2]
+        order_price = i[3]
+        order_description = i[4]
+        order_date = i[5]
+        reply += f"\n\U0001F194: {order_id}, <b>title</b>: {order_title}, " \
+                 f"<b>description</b>: {order_description}, \U0001F4B0: {order_price}, \U0001F4C5: {order_date}\n"
+    bot.send_message(message.chat.id, reply)
+
+
+@bot.message_handler(commands=["buy_order"])
+def buy_order(message):
+    try:
+        order = message.text.split()
+        order_id = order[1]
+        DB.buy_order(order_id, message.from_user.id)
+        DB.delete_order_row(order_id)
+
+        reply = f"\U00002705 You have successfully bought order \U0001F194: {order_id}!"
+        bot.send_message(message.chat.id, reply)
+    except:
+        reply = f"\U00002757 Buy orders <u>correctly</u>:\n" \
+                f"\n<b>Structure</b>: /buy_order order ID" \
+                f"\nExample: /buy_order 5" \
+                f"\n\nTo see available orders use this command: /show_orders"
+        bot.send_message(message.chat.id, reply)
+
+
+@bot.message_handler(commands=["show_purchased_orders"])
+def show_purchased_orders(message):
+    try:
+        result = DB.show_purchased_orders(message.from_user.id)
+        reply = f"\U0001F6CD <b>Purchased</b> items:\n"
+        for i in result:
+            reply += f"\n\U0001F194: {i[0]}, <b>Title</b>: {i[1]}, \U0001F4B0: {i[2]}"
+
+        bot.send_message(message.chat.id, reply)
+    except:
+        reply = f"Sorry, but you have not purchased any item yet."
+        bot.send_message(message.chat.id, reply)
 
 
 if __name__ == "__main__":
@@ -94,6 +144,11 @@ if __name__ == "__main__":
         types.BotCommand("/start", "Signing up"),
         types.BotCommand("/get_info", "Get information about me"),
         types.BotCommand("/edit_info", "Edit profile information"),
-        types.BotCommand("/add_order", "Post your order")
+        types.BotCommand("/add_order", "Post your order"),
+        types.BotCommand("/show_orders", "List of available goods"),
+        types.BotCommand("/buy_order", "Buy a thing"),
+        types.BotCommand("/show_purchased_orders", "Show your purchasing history")
     ])
+
+    print("Telegram bot started")
     bot.polling(none_stop=True)
