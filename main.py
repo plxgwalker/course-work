@@ -2,7 +2,7 @@ import telebot
 from telebot import types
 from db.db import DB
 
-API_TOKEN = 'API'
+API_TOKEN = ''
 bot = telebot.TeleBot(API_TOKEN, parse_mode="html")
 
 DB = DB("db/tg_db.db")
@@ -11,7 +11,7 @@ DB = DB("db/tg_db.db")
 @bot.message_handler(commands=["start"])
 def start(message) -> None:
     if DB.check_if_user_exists(message.from_user.id):
-        reply = f"You <b>have already registered</b> in our shop."
+        reply = "You <b>have already registered</b> in our shop."
         bot.send_message(message.chat.id, reply)
         return
 
@@ -50,25 +50,25 @@ def edit_info(message) -> None:
     user_city = types.InlineKeyboardButton(text="City", callback_data="user_city")
     markup.add(user_first_name, user_last_name, user_age, user_city)
 
-    reply = f"Which information You want to add/modify?\n\nIt can be:\n- First name\n- Last name" \
-            f"\n- Age\n- City"
+    reply = "Which information You want to add/modify?\n\nIt can be:\n- First name\n- Last name" \
+            "\n- Age\n- City"
     bot.send_message(message.chat.id, reply, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda callback: True)
 def edit_info_reply(callback):
     if callback.data == "user_f_name":
-        bot.send_message(callback.message.chat.id, f"Sorry, that's test area for now.")
+        bot.send_message(callback.message.chat.id, "\U0001FAE3 Sorry, that's test area for now.")
         # DB.edit_user_param(callback.message.chat.id, "user_fname", "Test")
 
     elif callback.data == "user_l_name":
-        bot.send_message(callback.message.chat.id, f"Sorry, that's test area for now.")
+        bot.send_message(callback.message.chat.id, "\U0001FAE3 Sorry, that's test area for now.")
 
     elif callback.data == "user_age":
-        bot.send_message(callback.message.chat.id, f"Sorry, that's test area for now.")
+        bot.send_message(callback.message.chat.id, "\U0001FAE3 Sorry, that's test area for now.")
 
     elif callback.data == "user_city":
-        bot.send_message(callback.message.chat.id, f"Sorry, that's test area for now.")
+        bot.send_message(callback.message.chat.id, "\U0001FAE3 Sorry, that's test area for now.")
 
 
 @bot.message_handler(commands=["add_order"])
@@ -83,12 +83,12 @@ def add_order(message) -> None:
 
         DB.add_order(int(user_id), str(order_title), str(order_description), int(order_price))
 
-        reply = f"Order with title <b>{order_title}</b> has been added"
+        reply = f"\U00002705 Order with title <b>{order_title}</b> has been added"
         bot.send_message(message.chat.id, reply)
-    except:
-        instruction = f"\U00002757 Post your order <u>correctly</u>:\n" \
-                      f"\n<b>Structure</b>: /add_order -title; order description; order price" \
-                      f"\nExample: /add_order -Battle of water; Simple water for 300$; 300"
+    except any():
+        instruction = "\U00002757 Post your order <u>correctly</u>:\n" \
+                      "\n<b>Structure</b>: /add_order -title; order description; order price" \
+                      "\nExample: /add_order -Battle of water; Simple water for 300$; 300"
         bot.send_message(message.chat.id, instruction)
 
 
@@ -129,13 +129,13 @@ def buy_order(message):
 def show_purchased_orders(message):
     try:
         result = DB.show_purchased_orders(message.from_user.id)
-        reply = f"\U0001F6CD <b>Purchased</b> items:\n"
+        reply = "\U0001F6CD <b>Purchased</b> items:\n"
         for i in result:
             reply += f"\n\U0001F194: {i[0]}, <b>Title</b>: {i[1]}, \U0001F4B0: {i[2]}"
 
         bot.send_message(message.chat.id, reply)
     except:
-        reply = f"Sorry, but you have not purchased any item yet."
+        reply = "\U0001FAE3 Sorry, but you have not purchased any item yet."
         bot.send_message(message.chat.id, reply)
 
 
