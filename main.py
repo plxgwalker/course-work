@@ -2,6 +2,7 @@ import telebot
 from telebot import types
 from db.db import DB
 
+
 API_TOKEN = '5405008993:AAHERhjznn_4l5k9-5nBTgS-W0DDSqXYGfo'
 bot = telebot.TeleBot(API_TOKEN, parse_mode="html")
 
