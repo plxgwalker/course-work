@@ -60,14 +60,28 @@ class DB:
         self.cursor = self.connector.cursor()
 
     def check_if_user_exists(self, user_id: int) -> bool:
-        """Check if user already exists in db."""
+        """SQL request for checking if user exists in table 'user_info'.
+
+        Args:
+            user_id (int): ID of current user.
+
+        Returns:
+            bool: True if user with this ID exists, False otherwise.
+        """
         result = self.cursor.execute(
             "SELECT user_info.user_id FROM user_info WHERE user_id = "+str(user_id)+";")
         return bool(len(result.fetchall()))
 
     def add_new_user(self, user_id: int, user_nickname: str, user_first_name: str,
                      user_last_name: str) -> None:
-        """Adding new user to db."""
+        """SQL request for inserting new user to 'user_info' table.
+
+        Args:
+            user_id (int): ID of current user.
+            user_nickname (str): Nickname of current user.
+            user_first_name (str): First name of current user.
+            user_last_name (str): Last name of current user.
+        """
         self.cursor.execute("INSERT INTO user_info (user_id, user_nickname, user_fname, user_lname) VALUES (?, ?, ?, ?)",
                             (user_id, user_nickname, user_first_name, user_last_name))
         self.connector.commit()
